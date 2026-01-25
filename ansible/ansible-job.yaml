@@ -56,10 +56,11 @@ spec:
 
       volumes:
       - name: ssh-key
-        secret:
-          # ここに Vault から同期された Secret 名を指定
-          secretName: ansible-ssh-key-sync
-          defaultMode: 256 # 0400 相当 (秘密鍵として必須)
+        csi:
+          driver: secrets-store.csi.k8s.io
+          readOnly: true
+          volumeAttributes:
+            secretProviderClass: "ansible-vault-spc"
       - name: playbook-storage
         emptyDir: {} # initContainer から container へ受け渡す一時領域
       restartPolicy: Never

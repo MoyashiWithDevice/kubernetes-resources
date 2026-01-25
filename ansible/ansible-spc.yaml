@@ -17,3 +17,4 @@ spec:
       - objectName: "private_key"
         secretPath: "secret/data/key/ansible"
         secretKey: "private_key"
+        filePermission: "0400"

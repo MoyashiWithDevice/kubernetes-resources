@@ -52,8 +52,9 @@ spec:
           readOnly: true
         - name: playbook-storage
           mountPath: "/ansible"
-        workingDir: "/ansible/ansible-resources"
-        command: ["ansible-playbook", "-i", "inventory.ini", "main.yml", "--private-key", "/root/.ssh/private_key"]
+        workingDir: "/ansible"
+        # command: ["ansible-playbook", "-i", "inventory.ini", "main.yml", "--private-key", "/root/.ssh/private_key"]
+        command: ["ls", "-R", "/ansible"]
 
       volumes:
       - name: ssh-key

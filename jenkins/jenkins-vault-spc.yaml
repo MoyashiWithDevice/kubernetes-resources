@@ -1,0 +1,35 @@
+apiVersion: secrets-store.csi.x-k8s.io/v1
+kind: SecretProviderClass
+metadata:
+  name: jenkins-vault-secrets
+  namespace: jenkins
+spec:
+  provider: vault
+  parameters:
+    vaultAddress: "http://vault.vault.svc:8200"
+    roleName: "jenkins-agent"          # Vault Kubernetes auth role
+    serviceAccountRef: "jenkins/jenkins-controller"
+    objects: |
+      - objectName: "private_key"
+        secretPath: "kv/data/jenkins"  # KV v2 の data パス
+        secretKey: "private_key"
+
+      - objectName: "public_key"
+        secretPath: "kv/data/jenkins"
+        secretKey: "public_key"
+
+      - objectName: "discord_webhook_url"
+        secretPath: "kv/data/jenkins"
+        secretKey: "discord_webhook_url"
+
+      - objectName: "github_token"
+        secretPath: "kv/data/jenkins"
+        secretKey: "github_token"
+
+      - objectName: "jenkins_username"
+        secretPath: "kv/data/jenkins"
+        secretKey: "jenkins_username"
+
+      - objectName: "jenkins_password"
+        secretPath: "kv/data/jenkins"
+        secretKey: "jenkins_password"

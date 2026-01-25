@@ -1,0 +1,48 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: bind9-config
+data:
+  named.conf: |
+    options {
+      directory "/var/cache/bind";
+
+      listen-on port 53 { any; };
+      listen-on-v6 { none; };
+
+      recursion yes;
+
+      // 社内LANのみ許可（例：172.31/172.32）
+      allow-query { any; };
+      allow-recursion { 172.31.0.0/24; 172.32.0.0/24; 192.168.0.0/16; 10.0.0.0/8; };
+
+      // 外部解決は上位DNSへ
+      forward only;
+      forwarders {
+        8.8.8.8;
+      };
+    };
+
+    zone "local.newvia.net" IN {
+      type master;
+      file "/etc/bind/zones/local.newvia.net";
+    };
+
+  local.newvia.net: |
+    $TTL 300
+    @   IN SOA ns.local.newvia.net. admin.local.newvia.net. (
+          2026011701  ; serial
+          3600        ; refresh
+          900         ; retry
+          604800      ; expire
+          300 )       ; minimum
+
+        IN NS ns.local.newvia.net.
+
+    ns  IN A 172.31.0.220
+    proxmox IN A 172.32.0.101
+    kube-ctrl IN A 172.31.0.9
+    kube-worker-rhel IN A 172.32.0.5
+    nfs IN A 172.31.0.11
+
+

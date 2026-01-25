@@ -1,0 +1,65 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: bind9-service
+  labels:
+    app: bind9
+spec:
+  type: LoadBalancer
+  loadBalancerIP: 172.31.0.220
+  selector:
+    app: bind9
+  ports:
+  - protocol: TCP
+    port: 53
+    targetPort: 53
+    name: bind9-tcp
+  - protocol: UDP
+    port: 53
+    targetPort: 53
+    name: bind9
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bind9-deployment
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: bind9
+  template:
+    metadata:
+      labels:
+        app: bind9
+    spec:
+      containers:
+      - name: bind9
+        image: ubuntu/bind9:edge
+        env:
+        ports:
+        - containerPort: 53
+          protocol: TCP
+        - containerPort: 53
+          protocol: UDP
+        volumeMounts:
+        - name: bind-config
+          mountPath: /etc/bind/named.conf
+          subPath: named.conf
+        - name: bind-zones
+          mountPath: /etc/bind/zones/local.newvia.net
+          subPath: local.newvia.net
+      volumes:
+      - name: bind-config
+        configMap:
+          name: bind9-config
+          items: 
+          - key: named.conf
+            path: named.conf
+      - name: bind-zones
+        configMap:
+          name: bind9-config
+          items:
+          - key: local.newvia.net
+            path: local.newvia.net

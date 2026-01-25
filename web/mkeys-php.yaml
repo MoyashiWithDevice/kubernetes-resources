@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mkeys-php
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: mkeys-php
+  template:
+    metadata:
+      labels:
+        app: mkeys-php
+    spec:
+      containers:
+      - name: mkeys-container
+        image: drupalci/php-8.3-apache:dev
+        ports:
+        - containerPort: 80
+        volumeMounts:
+        - name: nfs-storage
+          mountPath: /var/www/html
+      volumes:
+      - name: nfs-storage
+        nfs:
+          server: nfs.local.newvia.net
+          path: /nfs/mkeys
+          readOnly: false
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: mkeys-php
+spec:
+  type: ClusterIP
+  selector:
+    app: mkeys-php
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 80

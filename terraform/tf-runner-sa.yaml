@@ -1,0 +1,6 @@
+# tf-runner-sa.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: tf-runner
+  namespace: flux-system

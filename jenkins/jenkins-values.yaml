@@ -1,0 +1,143 @@
+persistence:
+  enabled: true
+  existingClaim: jenkins-home
+
+serviceAccount:
+  create: false
+  name: jenkins-controller
+
+controller:
+  image:
+    registry: docker.io
+    repository: jenkins/jenkins
+    tag: lts-jdk17
+    pullPolicy: IfNotPresent
+
+  serviceType: ClusterIP
+
+  persistence:
+    enabled: true
+    existingClaim: jenkins-home
+
+  testEnabled: false
+
+  serviceAccountName: jenkins-controller
+  serviceAccount:
+    create: false
+    name: jenkins-controller
+  
+  podAnnotations:
+    vault.hashicorp.com/agent-inject: "true"
+    vault.hashicorp.com/role: "jenkins-agent"
+
+    vault.hashicorp.com/agent-inject-secret-jenkins_username: "kv/data/jenkins"
+    vault.hashicorp.com/agent-inject-template-jenkins_username: |
+      {{ "{{" }}- with secret "kv/data/jenkins" -{{ "}}" }}
+      {{ "{{" }} .Data.data.jenkins_username {{ "}}" }}
+      {{ "{{" }}- end -{{ "}}" }}
+
+    vault.hashicorp.com/agent-inject-secret-jenkins_password: "kv/data/jenkins"
+    vault.hashicorp.com/agent-inject-template-jenkins_password: |
+      {{ "{{" }}- with secret "kv/data/jenkins" -{{ "}}" }}
+      {{ "{{" }} .Data.data.jenkins_password {{ "}}" }}
+      {{ "{{" }}- end -{{ "}}" }}
+
+    vault.hashicorp.com/agent-inject-secret-github_token: "kv/data/github"
+    vault.hashicorp.com/agent-inject-template-github_token: |
+      {{ "{{" }}- with secret "kv/data/github" -{{ "}}" }}
+      {{ "{{" }} .Data.data.token {{ "}}" }}
+      {{ "{{" }}- end -{{ "}}" }}
+    
+    vault.hashicorp.com/agent-inject-secret-private_key: "kv/data/jenkins"
+    vault.hashicorp.com/agent-inject-template-private_key: |
+      {{ "{{" }}- with secret "kv/data/jenkins" -{{ "}}" }}
+      {{ "{{" }} .Data.data.private_key {{ "}}" }}
+      {{ "{{" }}- end -{{ "}}" }}
+
+    vault.hashicorp.com/agent-inject-secret-public_key: "kv/data/jenkins"
+    vault.hashicorp.com/agent-inject-template-public_key: |
+      {{ "{{" }}- with secret "kv/data/jenkins" -{{ "}}" }}
+      {{ "{{" }} .Data.data.public_key {{ "}}" }}
+      {{ "{{" }}- end -{{ "}}" }}
+
+    vault.hashicorp.com/agent-inject-secret-discord_webhook_url: "kv/data/jenkins"
+    vault.hashicorp.com/agent-inject-template-discord_webhook_url: |
+      {{ "{{" }}- with secret "kv/data/jenkins" -{{ "}}" }}
+      {{ "{{" }} .Data.data.discord_webhook_url {{ "}}" }}
+      {{ "{{" }}- end -{{ "}}" }}
+
+  installPlugins:
+    - configuration-as-code
+    - job-dsl
+    - git
+    - workflow-multibranch
+    - github-branch-source
+    - kubernetes
+
+  JCasC:
+    defaultConfig: true
+    configScripts:
+      bootstrap: |
+        jenkins:
+          securityRealm:
+            local:
+              allowsSignup: false
+              users:
+                - id: "${file:/mnt/secrets/jenkins_username}"
+                  password: "${file:/mnt/secrets/jenkins_password}"
+          authorizationStrategy:
+            loggedInUsersCanDoAnything:
+              allowAnonymousRead: false
+        credentials:
+          system:
+            domainCredentials:
+              - credentials:
+                  - usernamePassword:
+                      scope: GLOBAL
+                      id: "github_token"
+                      username: "x-access-token"
+                      password: "${file:/mnt/secrets/github_token}"
+                      description: "Git PAT from PVC"
+
+        jobs:
+          - script: |
+              def repos = [
+                [owner: 'MoyashiWithDevice', repo: 'log_manage', job: 'log_manage', jenkinsfile: 'Jenkinsfile'],
+
+                [owner: 'MoyashiWithDevice', repo: 'reviewPage_mkeys', job: 'mkeys', jenkinsfile: 'Jenkinsfile']
+              ]
+
+              repos.each { r ->
+
+                multibranchPipelineJob(r.job) {
+                  displayName(r.owner + '/' + r.repo)
+                  description('created by JCasC + Job DSL')
+
+                  branchSources {
+                    branchSource {
+                      source {
+                        git {
+                          id(r.job) 
+                          remote('https://github.com/' + r.owner + '/' + r.repo + '.git')
+                          credentialsId('github_token')       
+                        }
+                      }
+                    }
+                  }
+
+                  factory {
+                    workflowBranchProjectFactory {
+                      scriptPath(r.jenkinsfile)
+                    }
+                  }
+                }
+              }
+
+agent:
+  enabled: true
+  image:
+    registry: docker.io
+    repository: jenkins/inbound-agent
+    tag: latest
+
+# helm upgrade --install jenkins jenkinsci/jenkins --namespace jenkins --create-namespace -f jenkins-values.yaml

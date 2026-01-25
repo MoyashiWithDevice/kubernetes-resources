@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Pod
+spec:
+  serviceAccountName: jenkins-agent-sa
+  volumes:
+    - name: vault-secrets
+      csi:
+        driver: secrets-store.csi.k8s.io
+        readOnly: true
+        volumeAttributes:
+          secretProviderClass: jenkins-vault-secrets
+  containers:
+    - name: jnlp
+      image: docker.io/jenkins/inbound-agent:latest
+      volumeMounts:
+        - name: vault-secrets
+          mountPath: /mnt/secrets
+          readOnly: true
+

@@ -5,6 +5,7 @@ metadata:
   namespace: flux-system
 spec:
   interval: 1m # 1分おきにリポジトリをチェック
+  path: "./"
   prune: true
   wait: true
   sourceRef:

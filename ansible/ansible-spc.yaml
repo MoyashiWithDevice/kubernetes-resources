@@ -1,0 +1,19 @@
+apiVersion: secrets-store.csi.x-k8s.io/v1
+kind: SecretProviderClass
+metadata:
+  name: ansible-vault-spc
+spec:
+  provider: vault
+  secretObjects:
+  - secretName: ansible-ssh-key-sync  # K8s Secretとしても同期させる
+    type: Opaque
+    data:
+    - objectName: private_key          # Vaultから取得したデータの名前
+      key: private_key                 # K8s Secret内のキー名
+  parameters:
+    vaultAddress: "http://vault.vault.svc:8200"
+    roleName: "ansible-role"
+    objects: |
+      - objectName: "private_key"
+        secretPath: "secret/data/key/ansible"
+        secretKey: "private_key"

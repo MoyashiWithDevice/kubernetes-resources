@@ -1,0 +1,65 @@
+# apiVersion: batch/v1
+# kind: Job
+# metadata:
+#   name: ansible-setup-job
+# spec:
+#   template:
+#     spec:
+#       containers:
+#       - name: ansible
+#         image: ansible/ansible:ubuntu1604
+#         volumeMounts:
+#         - name: ssh-key
+#           mountPath: "/root/.ssh"
+#           readOnly: true
+#         - name: playbook
+#           mountPath: "/ansible"
+#       volumes:
+#       - name: ssh-key
+#         secret:
+#           secretName: ansible-ssh-key
+#       - name: playbook
+#         configMap:
+#           name: ansible-playbooks
+#       restartPolicy: Never
+
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: ansible-setup-job
+spec:
+  template:
+    spec:
+      # 1. 起動時に最新の Playbook を Git から持ってくる
+      initContainers:
+      - name: git-sync
+        image: alpine/git
+        command: ["git", "clone", "https://github.com/your/ansible-repo.git", "/ansible"]
+        volumeMounts:
+        - name: playbook-storage
+          mountPath: /ansible
+      
+      containers:
+      - name: ansible
+        image: ansible/ansible:ubuntu1604
+        env:
+        - name: ANSIBLE_HOST_KEY_CHECKING
+          value: "False" # 初回接続エラーを防ぐ
+        volumeMounts:
+        - name: ssh-key
+          mountPath: "/root/.ssh"
+          readOnly: true
+        - name: playbook-storage
+          mountPath: "/ansible"
+        workingDir: "/ansible"
+        command: ["ansible-playbook", "-i", "inventory.ini", "main.yml", "--private_key", "/root/.ssh/private_key"]
+
+      volumes:
+      - name: ssh-key
+        secret:
+          # ここに Vault から同期された Secret 名を指定
+          secretName: ansible-ssh-key-sync
+          defaultMode: 256 # 0400 相当 (秘密鍵として必須)
+      - name: playbook-storage
+        emptyDir: {} # initContainer から container へ受け渡す一時領域
+      restartPolicy: Never

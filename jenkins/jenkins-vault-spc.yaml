@@ -11,20 +11,20 @@ spec:
     serviceAccountRef: "jenkins/jenkins-controller"
     objects: |
       - objectName: "private_key"
-        secretPath: "kv/data/jenkins"  # KV v2 の data パス
+        secretPath: "kv/data/key/jenkins"
         secretKey: "private_key"
 
       - objectName: "public_key"
-        secretPath: "kv/data/jenkins"
+        secretPath: "kv/data/key/jenkins"
         secretKey: "public_key"
+
+      - objectName: "github_token"
+        secretPath: "kv/data/github"
+        secretKey: "token"
 
       - objectName: "discord_webhook_url"
         secretPath: "kv/data/jenkins"
         secretKey: "discord_webhook_url"
-
-      - objectName: "github_token"
-        secretPath: "kv/data/jenkins"
-        secretKey: "github_token"
 
       - objectName: "jenkins_username"
         secretPath: "kv/data/jenkins"

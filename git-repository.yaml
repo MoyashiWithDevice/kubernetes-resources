@@ -1,0 +1,21 @@
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: GitRepository
+metadata:
+  name: ansible-resources
+  namespace: flux-system
+spec:
+  interval: 1m
+  url: https://github.com/MoyashiWithDevice/ansible-resources.git
+  ref:
+    branch: main
+---
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: GitRepository
+metadata:
+  name: terraform-resources
+  namespace: flux-system
+spec:
+  interval: 1m
+  url: https://github.com/MoyashiWithDevice/terraform-resources.git
+  ref:
+    branch: main

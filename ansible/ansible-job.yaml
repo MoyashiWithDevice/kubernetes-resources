@@ -2,6 +2,7 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: ansible-setup-job
+  namespace: flux-system
 spec:
   template:
     spec:

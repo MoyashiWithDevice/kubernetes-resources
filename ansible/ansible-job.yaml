@@ -35,7 +35,7 @@ spec:
       initContainers:
       - name: git-sync
         image: alpine/git
-        command: ["git", "clone", "https://github.com/MoyashiWithDevice/ansible-resources.git", "/"]
+        command: ["git", "clone", "https://github.com/MoyashiWithDevice/ansible-resources.git", "/ansible"]
         volumeMounts:
         - name: playbook-storage
           mountPath: /ansible
@@ -52,7 +52,7 @@ spec:
           readOnly: true
         - name: playbook-storage
           mountPath: "/ansible"
-        workingDir: "/ansible-resources"
+        workingDir: "/ansible/ansible-resources"
         command: ["ansible-playbook", "-i", "inventory.ini", "main.yml", "--private-key", "/root/.ssh/private_key"]
 
       volumes:

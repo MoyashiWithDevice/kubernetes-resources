@@ -4,13 +4,13 @@ metadata:
   name: proxmox-vm-provisioner-v2
   namespace: flux-system
 spec:
-  interval: 3m
+  interval: 1m
   approvePlan: auto
   path: ./terraform/proxmox-vms
   alwaysCleanupRunnerPod: false
   sourceRef:
     kind: GitRepository
-    name: my-infra-repo
+    name: terraform-resources
     namespace: flux-system
 
   # Terraform spec 直下の設定

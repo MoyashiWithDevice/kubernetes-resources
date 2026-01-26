@@ -18,6 +18,8 @@ spec:
       type: Opaque
       data:
         - objectName: "github_token"
-          key: password # Fluxはpasswordキーを期待する
-        - objectName: "github_token" # ユーザー名は何でも良い（PATで認証するため）
-          key: username
+          key: token      # Terraform用
+        - objectName: "github_token"
+          key: password   # Fluxのデフォルト用
+        - objectName: "github_token"
+          key: username   # 形式上必要

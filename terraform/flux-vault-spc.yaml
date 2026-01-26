@@ -23,3 +23,10 @@ spec:
           key: password   # Fluxのデフォルト用
         - objectName: "github_token"
           key: username   # 形式上必要
+  varFrom:
+    - kind: Secret 
+      name: github-auth
+      varsKeys:
+        - token
+        - password
+        - username

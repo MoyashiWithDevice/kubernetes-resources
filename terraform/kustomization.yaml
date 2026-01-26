@@ -1,6 +1,0 @@
-apiVersion: kustomize.toolkit.fluxcd.io/v1
-kind: Kustomization
-resources:
-  - tf-runner.yaml
-
-# これ使ってないかも？

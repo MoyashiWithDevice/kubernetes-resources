@@ -17,6 +17,6 @@ spec:
     kvVersion: "2"
     objects: |
       - objectName: "private_key"
-        secretPath: "kv/key/ansible"
+        secretPath: "kv/data/key/ansible"
         secretKey: "private_key"
         filePermission: 256 # 0400 in octal

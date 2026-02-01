@@ -14,6 +14,7 @@ spec:
   parameters:
     vaultAddress: "http://vault.vault.svc:8200"
     roleName: "ansible-role"
+    kvVersion: "2"
     objects: |
       - objectName: "private_key"
         secretPath: "kv/key/ansible"

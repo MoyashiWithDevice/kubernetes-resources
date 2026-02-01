@@ -16,6 +16,6 @@ spec:
     roleName: "ansible-role"
     objects: |
       - objectName: "private_key"
-        secretPath: "kv/data/key/ansible"
+        secretPath: "kv/key/ansible"
         secretKey: "private_key"
         filePermission: 256 # 0400 in octal

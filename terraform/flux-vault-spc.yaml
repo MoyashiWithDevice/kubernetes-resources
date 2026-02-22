@@ -17,8 +17,8 @@ spec:
       type: Opaque
       data:
         - objectName: "github_token"
-          key: TF_VAR_github_token      # Terraform用
+          key: token      # Terraform用
         - objectName: "github_token"
-          key: TF_VAR_github_password   # Fluxのデフォルト用
+          key: password   # Fluxのデフォルト用
         - objectName: "github_token"
-          key: TF_VAR_github_username   # 形式上必要
+          key: username   # 形式上必要

@@ -12,7 +12,6 @@ spec:
       - objectName: "github_token"
         secretPath: "kv/data/github"
         secretKey: "token"
-  # ここが重要：Vaultから取得した値を Kubernetes Secret として書き出す設定
   secretObjects:
     - secretName: github-auth # GitRepositoryが参照する名前
       type: Opaque
@@ -23,10 +22,3 @@ spec:
           key: password   # Fluxのデフォルト用
         - objectName: "github_token"
           key: username   # 形式上必要
-  varFrom:
-    - kind: Secret 
-      name: github-auth
-      varsKeys:
-        - token
-        - password
-        - username

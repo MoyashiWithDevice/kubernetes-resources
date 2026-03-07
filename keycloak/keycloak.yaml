@@ -78,18 +78,12 @@ spec:
           command: ["/bin/sh", "-c"]
           args:
             - |
-              # 1. Kubernetesトークンでログイン
               KUBE_TOKEN=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)
               export VAULT_TOKEN=$(vault write -field=token auth/kubernetes/login role=keycloak-role jwt=$KUBE_TOKEN)
-              
-              # 2. Vaultから個別に値を取得してファイルに書き出す
-              # kv/data/keycloak の data 階層にある項目を指定
               DB_USER=$(vault kv get -field=user kv/data/keycloak)
               DB_PASS=$(vault kv get -field=password kv/data/keycloak)
-              
               echo "export POSTGRES_USER=${DB_USER}" > /vault/secrets/credentials
               echo "export POSTGRES_PASSWORD=${DB_PASS}" >> /vault/secrets/credentials
-              
           volumeMounts:
             - name: vault-secrets
               mountPath: /vault/secrets
@@ -99,8 +93,9 @@ spec:
           command: ["/bin/sh", "-c"]
           args:
             - |
+              # source ではなく . を使う
               if [ -f /vault/secrets/credentials ]; then
-                source /vault/secrets/credentials
+                . /vault/secrets/credentials
               fi
               docker-entrypoint.sh postgres
           env:

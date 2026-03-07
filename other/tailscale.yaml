@@ -90,8 +90,11 @@ metadata:
   namespace: tailscale
 data:
   agent.hcl: |
-    exit_after_auth = false
     pid_file = "/tmp/vault-agent.pid"
+
+    vault {
+      address = "http://vault.vault.svc:8200"
+    }
 
     auto_auth {
       method "kubernetes" {
@@ -110,6 +113,5 @@ data:
 
     template {
       destination = "/vault/secrets/authkey"
-      contents = "{{ with secret \"kv/data/tailscale\" }}{{ .Data.data.authkey }}{{ end }}"
+      contents = "{{ with secret \"secret/data/tailscale\" }}{{ .Data.data.authkey }}{{ end }}"
     }
-

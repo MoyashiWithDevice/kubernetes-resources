@@ -1,98 +1,129 @@
 apiVersion: v1
-kind: Service
+kind: ServiceAccount
 metadata:
-  name: keycloak
-  namespace: keycloak
-  labels:
-    app: keycloak
-spec:
-  ports:
-    - protocol: TCP
-      port: 8080
-      targetPort: http
-      name: http
-  selector:
-    app: keycloak
-  type: ClusterIP
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: keycloak-discovery
-  namespace: keycloak
-  labels:
-    app: keycloak
-spec:
-  selector:
-    app: keycloak
-  clusterIP: None
-  type: ClusterIP
+  name: tailscale
+  namespace: tailscale
 
 ---
 
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: postgres
-  namespace: keycloak
-  labels:
-    app: postgres
+  name: tailscale
+  namespace: tailscale
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: postgres
+      app: tailscale
   template:
     metadata:
       labels:
-        app: postgres
-      annotations:
-        vault.hashicorp.com/agent-inject: "true"
-        vault.hashicorp.com/role: "keycloak-role"
-        vault.hashicorp.com/auth-config-audience: "https://kubernetes.default.svc.cluster.local"
-        vault.hashicorp.com/agent-inject-secret-credentials: "kv/data/keycloak"
-        vault.hashicorp.com/agent-inject-template-credentials: |
-          {{- with secret "kv/data/keycloak" -}}
-          export POSTGRES_USER="{{ .Data.data.user }}"
-          export POSTGRES_PASSWORD="{{ .Data.data.password }}"
-          {{- end -}}
+        app: tailscale
     spec:
-      serviceAccountName: keycloak-sa
+      serviceAccountName: tailscale
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
+
+      initContainers:
+      - name: vault-agent
+        image: hashicorp/vault:1.20
+        args:
+          - agent
+          - -config=/etc/vault/agent.hcl
+        volumeMounts:
+          - name: vault-config
+            mountPath: /etc/vault
+          - name: vault-secrets
+            mountPath: /vault
+
       containers:
-        - name: postgres
-          image: mirror.gcr.io/postgres:17
-          command: ["/bin/sh", "-c"]
-          args:
-            - |
-              if [ -f /vault/secrets/credentials ]; then
-                source /vault/secrets/credentials
-              fi
-              docker-entrypoint.sh postgres
-          env:
-            - name: POSTGRES_DB
-              value: "keycloak"
-          ports:
-            - name: postgres
-              containerPort: 5432
-          volumeMounts:
-            - name: postgres-data
-              mountPath: /var/lib/postgresql/data
+      - name: tailscale
+        image: tailscale/tailscale:stable
+
+        securityContext:
+          privileged: true
+          capabilities:
+            add:
+              - NET_ADMIN
+              - NET_RAW
+            
+        command:
+          - /bin/sh
+          - -c
+          - |
+            tailscaled --state=/var/lib/tailscale/tailscaled.state &
+
+            sleep 3
+            tailscale up \
+              --authkey=$(cat /vault/secrets/authkey) \
+              --hostname=$(hostname)
+
+            wait
+
+        volumeMounts:
+        - name: tailscale-state
+          mountPath: /var/lib/tailscale
+
+        - name: vault-secrets
+          mountPath: /vault
+
+        - name: dev-net-tun
+          mountPath: /dev/net/tun
+
       volumes:
-        - name: postgres-data
-          emptyDir: {}
+      - name: vault-config
+        configMap:
+          name: tailscale-vault-agent
+
+      - name: vault-secrets
+        emptyDir: {}
+
+      - name: tailscale-state
+        hostPath:
+          path: /var/lib/tailscale
+          type: DirectoryOrCreate
+
+      - name: dev-net-tun
+        hostPath:
+          path: /dev/net/tun
+          type: CharDevice
+
 ---
+
 apiVersion: v1
-kind: Service
+kind: ConfigMap
 metadata:
-  name: postgres
-  namespace: keycloak
-  labels:
-    app: postgres
-spec:
-  selector:
-    app: postgres
-  ports:
-    - protocol: TCP
-      port: 5432
-      targetPort: 5432
-  type: ClusterIP
+  name: tailscale-vault-agent
+  namespace: tailscale
+data:
+  agent.hcl: |
+    pid_file = "/tmp/vault-agent.pid"
+    exit_after_auth = true
+
+    vault {
+      address = "http://vault.vault.svc:8200"
+    }
+
+    auto_auth {
+      method "kubernetes" {
+        mount_path = "auth/kubernetes"
+        config = {
+          role = "tailscale"
+        }
+      }
+
+      sink "file" {
+        config = {
+          path = "/vault/token"
+        }
+      }
+    }
+    template_config {
+      exit_on_retry_failure = true
+    }
+
+    template {
+      destination = "/vault/secrets/authkey"
+      contents = "{{ with secret \"kv/data/tailscale\" }}{{ .Data.data.authkey }}{{ end }}"
+    }

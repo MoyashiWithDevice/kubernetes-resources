@@ -43,15 +43,21 @@ spec:
           privileged: true
 
         command:
-        - /bin/sh
-        - -c
-        - |
-          tailscaled --state=/var/lib/tailscale/tailscaled.state &
-          sleep 5
-          tailscale up \
-            --reset \
-            --authkey=$(cat /vault/secrets/authkey) \
-            --hostname=$(hostname)
+          - /bin/sh
+          - -c
+          - |
+            tailscaled --state=/var/lib/tailscale/tailscaled.state &
+
+            until [ -f /vault/secrets/authkey ]; do
+              sleep 1
+            done
+
+            tailscale up \
+              --reset \
+              --authkey=$(cat /vault/secrets/authkey) \
+              --hostname=$(hostname)
+
+            wait
 
         volumeMounts:
         - name: tailscale-state

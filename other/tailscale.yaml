@@ -20,30 +20,27 @@ spec:
     metadata:
       labels:
         app: tailscale
-      annotations:
-        vault.hashicorp.com/agent-inject: "true"
-        vault.hashicorp.com/role: "tailscale"
-        vault.hashicorp.com/agent-inject-secret-authkey: "secret/data/tailscale"
-        vault.hashicorp.com/agent-inject-template-authkey: |
-          {{- with secret "secret/data/tailscale" -}}
-          {{ .Data.data.authkey }}
-          {{- end }}
     spec:
       serviceAccountName: tailscale
-
       hostNetwork: true
       dnsPolicy: ClusterFirstWithHostNet
 
       containers:
+      - name: vault-agent
+        image: hashicorp/vault:1.15
+        args:
+          - "agent"
+          - "-config=/etc/vault/agent.hcl"
+        volumeMounts:
+        - name: vault-config
+          mountPath: /etc/vault
+        - name: vault-secrets
+          mountPath: /vault
+
       - name: tailscale
         image: tailscale/tailscale:stable
-
         securityContext:
           privileged: true
-
-        env:
-        - name: TS_STATE_DIR
-          value: /var/lib/tailscale
 
         command:
         - /bin/sh
@@ -51,16 +48,29 @@ spec:
         - |
           tailscaled --state=/var/lib/tailscale/tailscaled.state &
           sleep 5
-          tailscale up --authkey=$(cat /vault/secrets/authkey) --hostname=$(hostname)
+          tailscale up \
+            --reset \
+            --authkey=$(cat /vault/secrets/authkey) \
+            --hostname=$(hostname)
 
         volumeMounts:
         - name: tailscale-state
           mountPath: /var/lib/tailscale
 
+        - name: vault-secrets
+          mountPath: /vault
+
         - name: dev-net-tun
           mountPath: /dev/net/tun
 
       volumes:
+      - name: vault-config
+        configMap:
+          name: tailscale-vault-agent
+
+      - name: vault-secrets
+        emptyDir: {}
+
       - name: tailscale-state
         hostPath:
           path: /var/lib/tailscale
@@ -70,4 +80,36 @@ spec:
         hostPath:
           path: /dev/net/tun
           type: CharDevice
+
+---
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: tailscale-vault-agent
+  namespace: tailscale
+data:
+  agent.hcl: |
+    exit_after_auth = false
+    pid_file = "/tmp/vault-agent.pid"
+
+    auto_auth {
+      method "kubernetes" {
+        mount_path = "auth/kubernetes"
+        config = {
+          role = "tailscale"
+        }
+      }
+
+      sink "file" {
+        config = {
+          path = "/vault/token"
+        }
+      }
+    }
+
+    template {
+      destination = "/vault/secrets/authkey"
+      contents = "{{ with secret \"kv/data/tailscale\" }}{{ .Data.data.authkey }}{{ end }}"
+    }
 

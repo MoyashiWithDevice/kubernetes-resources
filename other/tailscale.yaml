@@ -113,5 +113,5 @@ data:
 
     template {
       destination = "/vault/secrets/authkey"
-      contents = "{{ with secret \"secret/data/tailscale\" }}{{ .Data.data.authkey }}{{ end }}"
+      contents = "{{ with secret \"kv/data/tailscale\" }}{{ .Data.data.authkey }}{{ end }}"
     }

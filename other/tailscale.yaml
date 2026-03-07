@@ -45,7 +45,8 @@ spec:
           - -c
           - |
             tailscaled --state=/var/lib/tailscale/tailscaled.state &
-
+            
+            sleep 3
             tailscale up \
               --authkey=$(cat /vault/secrets/authkey) \
               --hostname=$(hostname)
@@ -109,6 +110,9 @@ data:
           path = "/vault/token"
         }
       }
+    }
+    template_config {
+      exit_on_retry_failure = true
     }
 
     template {

@@ -84,8 +84,8 @@ spec:
               export VAULT_TOKEN=$(vault write -field=token auth/kubernetes/login role=keycloak-role jwt=$KUBE_TOKEN)
               
               # -field オプションを使えば jq は不要
-              USER=$(vault kv get -field=user kv/data/keycloak)
-              PASS=$(vault kv get -field=password kv/data/keycloak)
+              USER=$(vault read -field=user kv/data/keycloak)
+              PASS=$(vault read -field=password kv/data/keycloak)
               
               # ファイルを作成
               echo "POSTGRES_USER='${USER}'" > /vault/secrets/credentials

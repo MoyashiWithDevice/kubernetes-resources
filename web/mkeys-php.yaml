@@ -23,7 +23,8 @@ spec:
       volumes:
       - name: nfs-storage
         nfs:
-          server: nfs.local.newvia.net
+          # server: nfs.local.newvia.net
+          server: 172.31.0.11
           path: /nfs/mkeys
           readOnly: false
 ---

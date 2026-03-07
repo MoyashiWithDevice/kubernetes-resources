@@ -124,6 +124,21 @@ data:
       }
     }
 
+    server{
+      listen 0.0.0.0:40006;
+      listen [::]:40006;
+      server_name idp.newvia.net;
+      proxy_set_header Host idp.newvia.net;
+
+      resolver 10.96.0.10 valid=10s ipv6=off;
+
+      location / {
+        set $upstream "keycloak.keycloak.svc.cluster.local";
+        proxy_pass http://$upstream:8080;
+        include /etc/nginx/conf.d/param.conf;
+      }
+    }
+
     server {
       listen 0.0.0.0:40004;
       listen [::]:40004;

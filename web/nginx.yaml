@@ -30,6 +30,7 @@ spec:
         - containerPort: 40003
         - containerPort: 40004
         - containerPort: 40005
+        - containerPort: 40006
         volumeMounts:
           - name: nginx-conf
             mountPath: /etc/nginx/conf.d
@@ -77,6 +78,11 @@ spec:
       protocol: TCP
       port: 40005
       targetPort: 40005
+
+    - name: keycloak-idp 
+      protocol: TCP
+      port: 40006
+      targetPort: 40006
 
 ---
 

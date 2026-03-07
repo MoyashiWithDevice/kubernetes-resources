@@ -27,7 +27,7 @@ spec:
 
       containers:
       - name: vault-agent
-        image: hashicorp/vault:1.15
+        image: hashicorp/vault:1.20
         args:
           - "agent"
           - "-config=/etc/vault/agent.hcl"

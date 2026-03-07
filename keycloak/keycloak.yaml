@@ -78,12 +78,33 @@ spec:
           command: ["/bin/sh", "-c"]
           args:
             - |
+              set -e
+              # 1. Kubernetesトークンでログインし、トークンのみを抽出
               KUBE_TOKEN=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)
-              export VAULT_TOKEN=$(vault write -field=token auth/kubernetes/login role=keycloak-role jwt=$KUBE_TOKEN)
-              DB_USER=$(vault kv get -field=user kv/data/keycloak)
-              DB_PASS=$(vault kv get -field=password kv/data/keycloak)
+              
+              echo "Logging in to Vault..."
+              VAULT_TOKEN=$(curl -s --request POST \
+                --data "{\"jwt\": \"$KUBE_TOKEN\", \"role\": \"keycloak-role\"}" \
+                ${VAULT_ADDR}/v1/auth/kubernetes/login | jq -r '.auth.client_token')
+
+              # 2. 直接APIを叩いて秘密情報を取得
+              # 以前のエラーの原因だった「data」の重複を避けるため、パスを正確に指定
+              echo "Fetching secret..."
+              RESPONSE=$(curl -s --header "X-Vault-Token: $VAULT_TOKEN" \
+                ${VAULT_ADDR}/v1/kv/data/keycloak)
+
+              # 3. jqでパースしてファイルに書き出す
+              DB_USER=$(echo $RESPONSE | jq -r '.data.data.user')
+              DB_PASS=$(echo $RESPONSE | jq -r '.data.data.password')
+
+              if [ "$DB_USER" = "null" ] || [ "$DB_PASS" = "null" ]; then
+                echo "Error: Secrets not found in response"
+                exit 1
+              fi
+
               echo "export POSTGRES_USER=${DB_USER}" > /vault/secrets/credentials
               echo "export POSTGRES_PASSWORD=${DB_PASS}" >> /vault/secrets/credentials
+              echo "Credentials stored successfully."
           volumeMounts:
             - name: vault-secrets
               mountPath: /vault/secrets

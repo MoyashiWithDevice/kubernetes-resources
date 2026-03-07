@@ -30,57 +30,6 @@ spec:
 
 ---
 
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: postgres
-  namespace: keycloak
-  labels:
-    app: postgres
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: postgres
-  template:
-    metadata:
-      labels:
-        app: postgres
-      annotations:
-        vault.hashicorp.com/agent-inject: "true"
-        vault.hashicorp.com/role: "keycloak-role"
-        vault.hashicorp.com/auth-config-audience: "https://kubernetes.default.svc.cluster.local"
-        vault.hashicorp.com/agent-inject-secret-credentials: "kv/data/keycloak"
-        vault.hashicorp.com/agent-inject-template-credentials: |
-          {{- with secret "kv/data/keycloak" -}}
-          export POSTGRES_USER="{{ .Data.data.user }}"
-          export POSTGRES_PASSWORD="{{ .Data.data.password }}"
-          {{- end -}}
-    spec:
-      serviceAccountName: keycloak-sa
-      containers:
-        - name: postgres
-          image: mirror.gcr.io/postgres:17
-          command: ["/bin/sh", "-c"]
-          args:
-            - |
-              if [ -f /vault/secrets/credentials ]; then
-                source /vault/secrets/credentials
-              fi
-              docker-entrypoint.sh postgres
-          env:
-            - name: POSTGRES_DB
-              value: "keycloak"
-          ports:
-            - name: postgres
-              containerPort: 5432
-          volumeMounts:
-            - name: postgres-data
-              mountPath: /var/lib/postgresql/data
-      volumes:
-        - name: postgres-data
-          emptyDir: {}
----
 apiVersion: v1
 kind: Service
 metadata:
@@ -96,3 +45,68 @@ spec:
       port: 5432
       targetPort: 5432
   type: ClusterIP
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres
+  namespace: keycloak
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      serviceAccountName: keycloak-sa
+      volumes:
+        - name: vault-secrets
+          emptyDir: {}
+      initContainers:
+        - name: vault-fetch
+          image: hashicorp/vault:1.15 # Vault CLIが入っている軽量イメージ
+          env:
+            - name: VAULT_ADDR
+              value: "http://vault.vault.svc.cluster.local:8200"
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              # 1. KubernetesトークンでVaultにログイン
+              KUBE_TOKEN=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)
+              VAULT_TOKEN=$(vault write -field=token auth/kubernetes/login role=keycloak-role jwt=$KUBE_TOKEN)
+              
+              # 2. VaultからKVデータを取得 (JSON)
+              # kv/data/keycloak の中身が { "data": { "user": "...", "password": "..." } } であることを想定
+              vault kv get -format=json kv/data/keycloak > /tmp/secrets.json
+              
+              # 3. メインコンテナが読み込める形式で共有ボリュームに書き出し
+              # jqを使ってパースし、export文を作る
+              echo "export POSTGRES_USER=$(cat /tmp/secrets.json | jq -r .data.data.user)" > /vault/secrets/credentials
+              echo "export POSTGRES_PASSWORD=$(cat /tmp/secrets.json | jq -r .data.data.password)" >> /vault/secrets/credentials
+          volumeMounts:
+            - name: vault-secrets
+              mountPath: /vault/secrets
+      containers:
+        - name: postgres
+          image: mirror.gcr.io/postgres:17
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              if [ -f /vault/secrets/credentials ]; then
+                source /vault/secrets/credentials
+              fi
+              docker-entrypoint.sh postgres
+          env:
+            - name: POSTGRES_DB
+              value: "keycloak"
+          volumeMounts:
+            - name: vault-secrets
+              mountPath: /vault/secrets
+              readOnly: true
+            - name: postgres-data
+              mountPath: /var/lib/postgresql/data

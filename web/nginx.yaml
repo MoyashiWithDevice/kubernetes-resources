@@ -135,6 +135,7 @@ data:
       listen [::]:40006;
       server_name idp.newvia.net;
       proxy_set_header Host idp.newvia.net;
+      proxy_set_header X-Forwarded-Proto https;
 
       resolver 10.96.0.10 valid=10s ipv6=off;
 

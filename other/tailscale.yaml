@@ -40,12 +40,20 @@ spec:
       containers:
       - name: tailscale
         image: tailscale/tailscale:stable
+
+        securityContext:
+          privileged: true
+          capabilities:
+            add:
+              - NET_ADMIN
+              - NET_RAW
+            
         command:
           - /bin/sh
           - -c
           - |
             tailscaled --state=/var/lib/tailscale/tailscaled.state &
-            
+
             sleep 3
             tailscale up \
               --authkey=$(cat /vault/secrets/authkey) \

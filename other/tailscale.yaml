@@ -25,35 +25,28 @@ spec:
       hostNetwork: true
       dnsPolicy: ClusterFirstWithHostNet
 
-      containers:
+      initContainers:
       - name: vault-agent
         image: hashicorp/vault:1.20
         args:
-          - "agent"
-          - "-config=/etc/vault/agent.hcl"
+          - agent
+          - -config=/etc/vault/agent.hcl
         volumeMounts:
-        - name: vault-config
-          mountPath: /etc/vault
-        - name: vault-secrets
-          mountPath: /vault
+          - name: vault-config
+            mountPath: /etc/vault
+          - name: vault-secrets
+            mountPath: /vault
 
+      containers:
       - name: tailscale
         image: tailscale/tailscale:stable
-        securityContext:
-          privileged: true
-
         command:
           - /bin/sh
           - -c
           - |
             tailscaled --state=/var/lib/tailscale/tailscaled.state &
 
-            until [ -f /vault/secrets/authkey ]; do
-              sleep 1
-            done
-
             tailscale up \
-              --reset \
               --authkey=$(cat /vault/secrets/authkey) \
               --hostname=$(hostname)
 

@@ -90,6 +90,7 @@ metadata:
 data:
   agent.hcl: |
     pid_file = "/tmp/vault-agent.pid"
+    exit_after_auth = true
 
     vault {
       address = "http://vault.vault.svc:8200"

@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: mkeys-php
+  namespace: mkeys
 spec:
   replicas: 2
   selector:
@@ -23,8 +24,7 @@ spec:
       volumes:
       - name: nfs-storage
         nfs:
-          # server: nfs.local.newvia.net
-          server: 172.31.0.11
+          server: 172.31.0.11  # NFSサーバーのIP
           path: /nfs/mkeys
           readOnly: false
 ---

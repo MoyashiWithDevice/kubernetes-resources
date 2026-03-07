@@ -88,8 +88,8 @@ spec:
               PASS=$(vault kv get -field=password kv/keycloak)
               
               # ファイルを作成
-              echo "POSTGRES_USER='${USER}'" > /vault/secrets/credentials
-              echo "POSTGRES_PASSWORD='${PASS}'" >> /vault/secrets/credentials
+              echo "POSTGRES_USER=${USER}" > /vault/secrets/credentials
+              echo "POSTGRES_PASSWORD=${PASS}" >> /vault/secrets/credentials
 
           volumeMounts:
             - name: vault-secrets
@@ -101,7 +101,7 @@ spec:
           args:
             - |
               if [ -f /vault/secrets/credentials ]; then
-                while read -r line; do export "$line"; done < /vault/secrets/credentials
+                . /vault/secrets/credentials
               fi
               exec docker-entrypoint.sh postgres
           env:

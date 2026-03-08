@@ -19,10 +19,10 @@ controller:
     enabled: true
     existingClaim: jenkins-jobs
 
-  testEnabled: false
+  jenkinsUrl: https://jenkins.newvia.net/
   javaOpts: >
     -Djenkins.model.JenkinsLocationConfiguration.url=https://jenkins.newvia.net/
-    
+
   serviceAccountName: jenkins-controller
   serviceAccount:
     create: false

@@ -23,6 +23,10 @@ controller:
   javaOpts: >
     -Djenkins.model.JenkinsLocationConfiguration.url=https://jenkins.newvia.net/
 
+  containerEnv:
+    - name: JENKINS_OPTS
+      value: "--prefix=/ --httpListenAddress=0.0.0.0"
+      
   serviceAccountName: jenkins-controller
   serviceAccount:
     create: false

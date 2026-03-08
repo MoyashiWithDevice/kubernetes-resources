@@ -96,7 +96,7 @@ spec:
             - name: KC_HOSTNAME_ADMIN_URL
               value: "https://idp.newvia.net"
             - name: KC_PROXY
-              value: "passthrough"
+              value: "edge"
             - name: KC_PROXY_HEADERS
               value: "xforwarded"
             - name: KC_HTTP_ENABLED

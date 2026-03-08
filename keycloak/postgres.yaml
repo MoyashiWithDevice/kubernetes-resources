@@ -85,4 +85,3 @@ spec:
               readOnly: true
             - name: postgres-data
               mountPath: /var/lib/postgresql/data
-              subPath: postgres-db

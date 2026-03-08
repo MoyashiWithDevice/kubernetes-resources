@@ -30,44 +30,27 @@ spec:
 
 ---
 
-apiVersion: v1
-kind: Service
+apiVersion: apps/v1
+kind: StatefulSet
 metadata:
-  name: postgres
+  name: keycloak
   namespace: keycloak
   labels:
-    app: postgres
+    app: keycloak
 spec:
-  selector:
-    app: postgres
-  ports:
-    - protocol: TCP
-      port: 5432
-      targetPort: 5432
-  type: ClusterIP
-
----
-
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: postgres
-  namespace: keycloak
-spec:
+  serviceName: keycloak-discovery
   replicas: 1
   selector:
     matchLabels:
-      app: postgres
+      app: keycloak
   template:
     metadata:
       labels:
-        app: postgres
+        app: keycloak
     spec:
       serviceAccountName: keycloak-sa
       volumes:
         - name: vault-secrets
-          emptyDir: {}
-        - name: postgres-data
           emptyDir: {}
       initContainers:
         - name: vault-fetch
@@ -80,23 +63,22 @@ spec:
             - |
               set -e
               KUBE_TOKEN=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)
-              # 認証してトークンを環境変数にセット
               export VAULT_TOKEN=$(vault write -field=token auth/kubernetes/login role=keycloak-role jwt=$KUBE_TOKEN)
               
-              # -field オプションを使えば jq は不要
               USER=$(vault kv get -field=username kv/keycloak)
               PASS=$(vault kv get -field=password kv/keycloak)
               
-              # ファイルを作成
-              echo "POSTGRES_USER=$USER" > /vault/secrets/credentials
-              echo "POSTGRES_PASSWORD=$PASS" >> /vault/secrets/credentials
+              echo "KC_DB_USERNAME=$USER" > /vault/secrets/credentials
+              echo "KC_DB_PASSWORD=$PASS" >> /vault/secrets/credentials
+              echo "KC_BOOTSTRAP_ADMIN_USERNAME=$USER" >> /vault/secrets/credentials
+              echo "KC_BOOTSTRAP_ADMIN_PASSWORD=$PASS" >> /vault/secrets/credentials
 
           volumeMounts:
             - name: vault-secrets
               mountPath: /vault/secrets
       containers:
-        - name: postgres
-          image: mirror.gcr.io/postgres:17
+        - name: keycloak
+          image: quay.io/keycloak/keycloak:26.5.5
           command: ["/bin/sh", "-c"]
           args:
             - |
@@ -105,13 +87,44 @@ spec:
                   export "$line"
                 done < /vault/secrets/credentials
               fi
-              exec docker-entrypoint.sh postgres
+              exec /opt/keycloak/bin/kc.sh start
           env:
-            - name: POSTGRES_DB
-              value: "keycloak"
+            - name: KC_HOSTNAME
+              value: "idp.newvia.net"
+            - name: KC_PROXY_HEADERS
+              value: "xforwarded"
+            - name: KC_HTTP_ENABLED
+              value: "true"
+            - name: KC_HOSTNAME_STRICT
+              value: "true"
+            - name: KC_HOSTNAME_STRICT_HTTPS
+              value: "true"
+            - name: KC_HEALTH_ENABLED
+              value: "true"
+            - name: KC_CACHE
+              value: "ispn"
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+            - name: KC_CACHE_EMBEDDED_NETWORK_BIND_ADDRESS
+              value: '$(POD_IP)'
+            - name: KC_DB_URL_DATABASE
+              value: 'keycloak'
+            - name: KC_DB_URL_HOST
+              value: 'postgres'
+            - name: KC_DB
+              value: 'postgres'
           volumeMounts:
             - name: vault-secrets
               mountPath: /vault/secrets
               readOnly: true
-            - name: postgres-data
-              mountPath: /var/lib/postgresql/data
+          ports:
+            - name: http
+              containerPort: 8080
+          startupProbe:
+            httpGet:
+              path: /health/started
+              port: 9000
+            periodSeconds: 1
+            failureThreshold: 600

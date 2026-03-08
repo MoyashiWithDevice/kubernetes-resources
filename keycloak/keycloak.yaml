@@ -91,6 +91,8 @@ spec:
           env:
             - name: KC_HOSTNAME
               value: "idp.newvia.net"
+            - name: KC_PROXY
+              value: "edge"
             - name: KC_PROXY_HEADERS
               value: "xforwarded"
             - name: KC_HTTP_ENABLED

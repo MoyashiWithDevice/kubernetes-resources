@@ -79,6 +79,8 @@ spec:
           env:
             - name: POSTGRES_DB
               value: "keycloak"
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
           volumeMounts:
             - name: vault-secrets
               mountPath: /vault/secrets

@@ -17,7 +17,7 @@ controller:
 
   persistence:
     enabled: true
-    existingClaim: jenkins-home
+    existingClaim: jenkins-jobs
 
   testEnabled: false
 
@@ -65,73 +65,6 @@ controller:
       {{ "{{" }}- with secret "kv/data/jenkins" -{{ "}}" }}
       {{ "{{" }} .Data.data.discord_webhook_url {{ "}}" }}
       {{ "{{" }}- end -{{ "}}" }}
-
-  installPlugins:
-    - configuration-as-code
-    - job-dsl
-    - git
-    - workflow-multibranch
-    - github-branch-source
-    - kubernetes
-
-  JCasC:
-    defaultConfig: true
-    configScripts:
-      bootstrap: |
-        jenkins:
-          securityRealm:
-            local:
-              allowsSignup: false
-              users:
-                - id: "${file:/mnt/secrets/jenkins_username}"
-                  password: "${file:/mnt/secrets/jenkins_password}"
-          authorizationStrategy:
-            loggedInUsersCanDoAnything:
-              allowAnonymousRead: false
-        credentials:
-          system:
-            domainCredentials:
-              - credentials:
-                  - usernamePassword:
-                      scope: GLOBAL
-                      id: "github_token"
-                      username: "x-access-token"
-                      password: "${file:/mnt/secrets/github_token}"
-                      description: "Git PAT from PVC"
-
-        jobs:
-          - script: |
-              def repos = [
-                [owner: 'MoyashiWithDevice', repo: 'log_manage', job: 'log_manage', jenkinsfile: 'Jenkinsfile'],
-
-                [owner: 'MoyashiWithDevice', repo: 'reviewPage_mkeys', job: 'mkeys', jenkinsfile: 'Jenkinsfile']
-              ]
-
-              repos.each { r ->
-
-                multibranchPipelineJob(r.job) {
-                  displayName(r.owner + '/' + r.repo)
-                  description('created by JCasC + Job DSL')
-
-                  branchSources {
-                    branchSource {
-                      source {
-                        git {
-                          id(r.job) 
-                          remote('https://github.com/' + r.owner + '/' + r.repo + '.git')
-                          credentialsId('github_token')       
-                        }
-                      }
-                    }
-                  }
-
-                  factory {
-                    workflowBranchProjectFactory {
-                      scriptPath(r.jenkinsfile)
-                    }
-                  }
-                }
-              }
 
 agent:
   enabled: true

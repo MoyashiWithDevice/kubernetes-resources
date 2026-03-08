@@ -23,6 +23,9 @@ controller:
   javaOpts: >
     -Djenkins.model.JenkinsLocationConfiguration.url=https://jenkins.newvia.net/
 
+  JCasC:
+    enabled: false
+    
   serviceAccountName: jenkins-controller
   serviceAccount:
     create: false

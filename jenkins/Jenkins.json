@@ -1,0 +1,11 @@
+{
+  "realm": "master",
+  "auth-server-url": "https://idp.newvia.net/",
+  "ssl-required": "external",
+  "resource": "Jenkins",
+  "public-client": false,
+  "credentials": {
+    "secret": "yIz6JrumGX0CFppNLaLQShpI6GesftT1"
+  },
+  "confidential-port": 0
+}

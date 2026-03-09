@@ -55,13 +55,13 @@ controller:
     
     vault.hashicorp.com/agent-inject-secret-private_key: "kv/data/jenkins"
     vault.hashicorp.com/agent-inject-template-private_key: |
-      {{ "{{" }}- with secret "kv/data/jenkins" -{{ "}}" }}
+      {{ "{{" }}- with secret "kv/data/key/jenkins" -{{ "}}" }}
       {{ "{{" }} .Data.data.private_key {{ "}}" }}
       {{ "{{" }}- end -{{ "}}" }}
 
     vault.hashicorp.com/agent-inject-secret-public_key: "kv/data/jenkins"
     vault.hashicorp.com/agent-inject-template-public_key: |
-      {{ "{{" }}- with secret "kv/data/jenkins" -{{ "}}" }}
+      {{ "{{" }}- with secret "kv/data/key/jenkins" -{{ "}}" }}
       {{ "{{" }} .Data.data.public_key {{ "}}" }}
       {{ "{{" }}- end -{{ "}}" }}
 

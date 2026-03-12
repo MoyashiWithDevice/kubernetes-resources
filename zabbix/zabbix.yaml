@@ -685,7 +685,7 @@ spec:
           - name: ZBX_DEBUGLEVEL
             value: "3"
           - name: ZBX_PROXYLOCALBUFFER
-            value: 24
+            value: "24"
           - name: ZBX_PROXYOFFLINEBUFFER
             value: ""
           - name: ZBX_STARTPOLLERS
@@ -875,7 +875,7 @@ spec:
           - name: ZBX_DEBUGLEVEL
             value: "3"
           - name: ZBX_PROXYLOCALBUFFER
-            value: 24
+            value: "24"
           - name: ZBX_PROXYOFFLINEBUFFER
             value: ""
           - name: ZBX_PROXYCONFIGFREQUENCY
@@ -1188,7 +1188,7 @@ spec:
             - name: ZBX_HOSTINTERFACEITEM
               value: ""
             - name: ZBX_REFRESHACTIVECHECKS
-              value: 120
+              value: "120"
             - name: DEBUG_MODE
               value: "3"
             - name: ZBX_TLSCONNECT

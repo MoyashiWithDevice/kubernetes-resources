@@ -314,8 +314,8 @@ metadata:
   namespace: zabbix
 spec:
   serviceName: mysql-server
-  strategy:
-    type: Recreate
+  updateStrategy:
+    type: RollingUpdate
   selector:
     matchLabels:
       name: mysql-server
@@ -337,7 +337,7 @@ spec:
           secretName: zabbix-mysql-server-tls-certs
        - name: mysql-initdb
          configMap:
-         name: mysql-initdb
+          name: mysql-initdb
       containers:
         - name: zabbix-db
           image: mysql:8.0-oracle
@@ -346,7 +346,7 @@ spec:
            - --character-set-server=utf8
            - --collation-server=utf8_bin
            - --default-authentication-plugin=mysql_native_password
-           - --require-secure-transport
+          #  - --require-secure-transport
            - --ssl-ca=/tmp/secrets/root-ca.pem
            - --ssl-cert=/tmp/secrets/server-cert.pem
            - --ssl-key=/tmp/secrets/server-key.pem

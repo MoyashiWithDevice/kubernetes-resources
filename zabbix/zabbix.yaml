@@ -347,10 +347,10 @@ spec:
            - --collation-server=utf8_bin
            - --default-authentication-plugin=mysql_native_password
           #  - --require-secure-transport
-           - --ssl-ca=/tmp/secrets/root-ca.pem
-           - --ssl-cert=/tmp/secrets/server-cert.pem
-           - --ssl-key=/tmp/secrets/server-key.pem
-           - --tls-version=TLSv1.2,TLSv1.3
+          #  - --ssl-ca=/tmp/secrets/root-ca.pem
+          #  - --ssl-cert=/tmp/secrets/server-cert.pem
+          #  - --ssl-key=/tmp/secrets/server-key.pem
+          #  - --tls-version=TLSv1.2,TLSv1.3
           ports:
           - containerPort: 3306
             name: mysql

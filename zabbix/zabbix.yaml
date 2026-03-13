@@ -305,7 +305,7 @@ spec:
             readOnly: true
 ---
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: mysql-server
   labels:
@@ -313,6 +313,7 @@ metadata:
     tier: mysql-server
   namespace: zabbix
 spec:
+  serviceName: mysql-server
   strategy:
     type: Recreate
   selector:
@@ -334,6 +335,9 @@ spec:
        - name: mysql-tls-certs
          secret:
           secretName: zabbix-mysql-server-tls-certs
+       - name: mysql-initdb
+         configMap:
+         name: mysql-initdb
       containers:
         - name: zabbix-db
           image: mysql:8.0-oracle
@@ -374,6 +378,9 @@ spec:
              readOnly: false
            - mountPath: "/tmp/secrets"
              name: mysql-tls-certs
+             readOnly: true
+           - mountPath: /docker-entrypoint-initdb.d
+             name: mysql-initdb
              readOnly: true
           securityContext:
             capabilities: {}
@@ -1332,7 +1339,21 @@ spec:
     storage: 20Gi
   accessModes:
     - ReadWriteOnce
-  persistentVolumeReclaimPolicy: Delete
+  persistentVolumeReclaimPolicy: Retain
   hostPath:
     path: /data/pv0001
     type: DirectoryOrCreate
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mysql-initdb
+  namespace: zabbix
+data:
+  init.sql: |
+    CREATE DATABASE IF NOT EXISTS zabbix_proxy;
+    CREATE USER IF NOT EXISTS 'zabbix'@'%' IDENTIFIED BY 'zbx_password';
+    GRANT ALL PRIVILEGES ON zabbix.* TO 'zabbix'@'%';
+    GRANT ALL PRIVILEGES ON zabbix_proxy.* TO 'zabbix'@'%';
+    FLUSH PRIVILEGES;

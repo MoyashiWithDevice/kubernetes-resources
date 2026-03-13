@@ -528,7 +528,7 @@ spec:
           - name: ZBX_CACHESIZE
             value: "128M"
           - name: ZBX_CACHEUPDATEFREQUENCY
-            value: ""
+            value: "60"
           - name: ZBX_STARTDBSYNCERS
             value: ""
           - name: ZBX_HISTORYCACHESIZE
@@ -870,7 +870,7 @@ spec:
           - name: ZBX_DEBUGLEVEL
             value: "3"
           - name: ZBX_PROXYLOCALBUFFER
-            value: "24h"
+            value: "24"
           - name: ZBX_PROXYOFFLINEBUFFER
             value: ""
           - name: ZBX_PROXYCONFIGFREQUENCY
@@ -1183,7 +1183,7 @@ spec:
             - name: ZBX_HOSTINTERFACEITEM
               value: ""
             - name: ZBX_REFRESHACTIVECHECKS
-              value: "120s"
+              value: "120"
             - name: DEBUG_MODE
               value: "3"
             - name: ZBX_TLSCONNECT

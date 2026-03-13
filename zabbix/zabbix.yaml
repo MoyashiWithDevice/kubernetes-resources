@@ -526,7 +526,7 @@ spec:
           - name: ZBX_MAXHOUSEKEEPERDELETE
             value: ""
           - name: ZBX_CACHESIZE
-            value: ""
+            value: "128M"
           - name: ZBX_CACHEUPDATEFREQUENCY
             value: ""
           - name: ZBX_STARTDBSYNCERS
@@ -912,7 +912,7 @@ spec:
           - name: ZBX_HOUSEKEEPINGFREQUENCY
             value: ""
           - name: ZBX_CACHESIZE
-            value: ""
+            value: "128M"
           - name: ZBX_STARTDBSYNCERS
             value: ""
           - name: ZBX_HISTORYCACHESIZE

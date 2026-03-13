@@ -451,14 +451,14 @@ spec:
               key: db-root-pass
           - name: MYSQL_DATABASE
             value: "zabbix"
-          - name: ZBX_DBTLSCONNECT
-            value: "required"
-          - name: ZBX_DBTLSCAFILE
-            value: "/tmp/secrets/root-ca.pem"
-          - name: ZBX_DBTLSCERTFILE
-            value: "/tmp/secrets/client-cert.pem"
-          - name: ZBX_DBTLSKEYFILE
-            value: "/tmp/secrets/client-key.pem"
+          # - name: ZBX_DBTLSCONNECT
+          #   value: "required"
+          # - name: ZBX_DBTLSCAFILE
+          #   value: "/tmp/secrets/root-ca.pem"
+          # - name: ZBX_DBTLSCERTFILE
+          #   value: "/tmp/secrets/client-cert.pem"
+          # - name: ZBX_DBTLSKEYFILE
+          #   value: "/tmp/secrets/client-key.pem"
           # - name: ZBX_DBTLSCIPHER
           #   value: ""
           # - name: ZBX_DBTLSCIPHER13
@@ -841,14 +841,14 @@ spec:
               key: db-root-pass
           - name: MYSQL_DATABASE
             value: "zabbix_proxy"
-          - name: ZBX_DBTLSCONNECT
-            value: "required"
-          - name: ZBX_DBTLSCAFILE
-            value: "/tmp/secrets/root-ca.pem"
-          - name: ZBX_DBTLSCERTFILE
-            value: "/tmp/secrets/client-cert.pem"
-          - name: ZBX_DBTLSKEYFILE
-            value: "/tmp/secrets/client-key.pem"
+          # - name: ZBX_DBTLSCONNECT
+          #   value: "required"
+          # - name: ZBX_DBTLSCAFILE
+          #   value: "/tmp/secrets/root-ca.pem"
+          # - name: ZBX_DBTLSCERTFILE
+          #   value: "/tmp/secrets/client-cert.pem"
+          # - name: ZBX_DBTLSKEYFILE
+          #   value: "/tmp/secrets/client-key.pem"
           # - name: ZBX_DBTLSCIPHER
           #   value: ""
           # - name: ZBX_DBTLSCIPHER13

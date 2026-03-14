@@ -418,9 +418,6 @@ spec:
       volumes:
        - name: zabbix-snmptraps
          emptyDir: {}
-       - name: mysql-tls-certs
-         secret:
-           secretName: zabbix-mysql-client-tls-certs
       initContainers:
       - name: wait-for-mysql
         image: busybox:1.36
@@ -592,9 +589,6 @@ spec:
           volumeMounts:
           - name: zabbix-snmptraps
             mountPath: "/var/lib/zabbix/snmptraps"
-            readOnly: true
-          - mountPath: "/tmp/secrets"
-            name: mysql-tls-certs
             readOnly: true
           startupProbe:
             tcpSocket:

@@ -366,6 +366,16 @@ spec:
             if [ "$TABLE_EXISTS" -eq 1 ]; then
               echo "'users' table exists. Checking for Admin user...";
 
+              # 必要な role が存在するか確認し、なければ作成
+              ROLE_EXISTS=$(mysql -h mysql-server -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" -D "$MYSQL_DATABASE" -sse "SELECT COUNT(*) FROM role WHERE roleid=1;")
+              if [ "$ROLE_EXISTS" -eq 0 ]; then
+                echo "Required role not found. Creating role with roleid=1...";
+                mysql -h mysql-server -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" -D "$MYSQL_DATABASE" -e "
+                  INSERT INTO role (roleid, name) VALUES (1, 'Zabbix Admin');"
+              else
+                echo "Required role exists. Skipping role creation.";
+              fi
+
               # Adminユーザの存在確認
               ADMIN_EXISTS=$(mysql -h mysql-server -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" -D "$MYSQL_DATABASE" -sse "SELECT COUNT(*) FROM users WHERE username='Admin';")
 
@@ -469,10 +479,10 @@ spec:
           startupProbe:
             tcpSocket:
               port: 10051
-            initialDelaySeconds: 15
-            periodSeconds: 5
-            timeoutSeconds: 3
-            failureThreshold: 40
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            timeoutSeconds: 10
+            failureThreshold: 18
           securityContext:
             capabilities: {}
             privileged: false

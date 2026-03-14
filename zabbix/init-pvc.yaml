@@ -1,0 +1,35 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: mysql-init
+  namespace: zabbix
+spec:
+  template:
+    spec:
+      restartPolicy: OnFailure
+      containers:
+      - name: mysql-init
+        image: mysql:5.7-oracle
+        command:
+          - sh
+          - -c
+          - |
+            if [ -z "$(ls -A /var/lib/mysql)" ]; then
+              echo "Initializing MySQL database..."
+              mysqld --initialize-insecure --datadir=/var/lib/mysql
+            else
+              echo "Database already initialized, skipping."
+            fi
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: db-secret
+              key: db-root-pass
+        volumeMounts:
+        - name: zabbix-mysql-data
+          mountPath: /var/lib/mysql
+      volumes:
+      - name: zabbix-mysql-data
+        persistentVolumeClaim:
+          claimName: zabbix-mysql-claim

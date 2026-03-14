@@ -97,61 +97,7 @@ spec:
     name: zabbix-server
   sessionAffinity: None
   type: ClusterIP
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: zabbix-proxy-sqlite3
-  labels:
-    app: zabbix
-  namespace: zabbix
-spec:
-  ports:
-  - port: 10051
-    targetPort: 10051
-    name: zabbix-trapper
-  - port: 162
-    targetPort: 1162
-    protocol: UDP
-    name: snmp-trap
-  selector:
-    name: zabbix-proxy-sqlite3
-  sessionAffinity: None
-  type: ClusterIP
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: zabbix-proxy-mysql
-  labels:
-    app: zabbix
-  namespace: zabbix
-spec:
-  ports:
-  - port: 10051
-    targetPort: 10051
-    name: zabbix-trapper
-  - port: 162
-    targetPort: 1162
-    protocol: UDP
-    name: snmp-trap
-  selector:
-    name: zabbix-proxy-mysql
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: zabbix-java-gateway
-  labels:
-    app: zabbix
-  namespace: zabbix
-spec:
-  ports:
-  - port: 10052
-    targetPort: 10052
-    name: zabbix-jmx
-  selector:
-    name: zabbix-java-gateway
+
 ---
 apiVersion: v1
 kind: Service
@@ -567,55 +513,6 @@ spec:
             capabilities: {}
             privileged: false
 ---
-
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: zabbix-java-gateway
-  labels:
-    app: zabbix
-    tier: java
-  namespace: zabbix
-spec:
-  selector:
-    matchLabels:
-     name: zabbix-java-gateway
-     app: zabbix
-  template:
-    metadata:
-      labels:
-        name: zabbix-java-gateway
-        app: zabbix
-    spec:
-      containers:
-        - name: zabbix-java-gateway
-          image: zabbix/zabbix-java-gateway:alpine-6.0-latest
-          imagePullPolicy: IfNotPresent
-          ports:
-          - containerPort: 10052
-            protocol: TCP
-            name: zabbix-java
-          livenessProbe:
-            tcpSocket:
-              port: 10052
-            initialDelaySeconds: 5
-            failureThreshold: 3
-            periodSeconds: 2
-          env:
-          - name: ZBX_START_POLLERS
-            value: "5"
-          - name: ZBX_TIMEOUT
-            value: "3"
-          - name: ZBX_DEBUGLEVEL
-            value: "info"
-          - name: JAVA_OPTIONS
-            value: ""
-          - name: DEBUG_MODE
-            value: "false"
-          securityContext:
-            capabilities: {}
-            privileged: false
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -911,18 +808,6 @@ items:
      db-root-pass: "c29tZV90ZXN0X3Bhc3M="
      db-zbx-user: "emFiYml4"
      db-zbx-pass: "emJ4X3Bhc3N3b3Jk"
----
-apiVersion: v1
-data:
-  client-cert.pem: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUM4ekNDQWRzQ0FRRXdEUVlKS29aSWh2Y05BUUVMQlFBd1FERVRNQkVHQ2dtU0pvbVQ4aXhrQVJrV0EyTnYKYlRFWE1CVUdDZ21TSm9tVDhpeGtBUmtXQjJWNFlXMXdiR1V4RURBT0JnTlZCQU1NQjBaaGEyVXRRMEV3SGhjTgpNakV3T1RJeU1URTFNalV4V2hjTk16RXdPREF4TVRFMU1qVXhXakEvTVJNd0VRWUtDWkltaVpQeUxHUUJHUllEClkyOXRNUmN3RlFZS0NaSW1pWlB5TEdRQkdSWUhaWGhoYlhCc1pURVBNQTBHQTFVRUF3d0dZMnhwWlc1ME1JSUIKSWpBTkJna3Foa2lHOXcwQkFRRUZBQU9DQVE4QU1JSUJDZ0tDQVFFQXVZTllXVUp3Y2Nsd0oxbnYwS1YyNGVncQpUQW1vM1N5cTFwMS9OTGZIdGd1UVcyZllSUXJkVFZ5OU80R0VyWmUwVCtmMnFwRUtPN2JoSExvVElnMFZXQmNoClU4K2g1dVhSZlVhZC90eHVKNWh0QnBIL1hpR0NEbVFpSFVtd0hxbHJwK0pDL3lmTzJwb3pDalpaOVF4RVBlYjgKQmEwaHgycUZXUEtKc1ZSY0JTejMzMm1tY1ZjeGE5YmtsWVVQZHgwUTVGSHFWZ1pXOTI0QXdHOC95QThxcUFiNApPcVkxbUZkUW9VaW9kTjRGUDQzSkVGSWxrMnExWUVjenlSMHlidVJIelBIQjhJUG1Fa2lNaHlpSitsdnJaSzZLCjR5NWZVSzQ0SXkxanYveEJDSnJ3TmNnVVZBdGFYTStiV2RXS3U4dDNudGV6ME02ZWU2Ym5WSHhTeDh0NWF3SUQKQVFBQk1BMEdDU3FHU0liM0RRRUJDd1VBQTRJQkFRQW9SOE5SZEo4YUJsWnZBOWFCVzQ1SFdnWGF0Z1ExcGRpNwo3R1BpL3Qzem5MWTNNamMrUVZSdmZLUlFvU2wwc095NUZ5NFlZWHdwZDlQRUsxVXBReFRaK201SGtVWm9LR095CnlISzZ1aGZ6NFY5NXNRdkcvdGcvaS9ESHQvVlJYMEpsc2lpTW1zalFYRFpPcUpaOUNPTnhOYUlObkdSZGZEUVoKNVRneUEraXVyTU5mcThpUU9HcDhYRGkzNStvMlp4enpDWHl3SGRRVDExcTdSbThBZDNGaG5xKzJQVGR0UDduYwpZWFB4Ym1ibkxMeTBReFl3Y1BYQlkrWjNrTFlxbk1wK2ozajIwcE0rTE1sMkNBbTNDblJsdU9yKytrTTV1T29hCnkxOHN6QWJRSjF4L0RoMEFmQUZKOG90THMrUU9IU2prdUoveEJCelkxelNETnRNdmxUMDEKLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQo=
-  client-key.pem: LS0tLS1CRUdJTiBSU0EgUFJJVkFURSBLRVktLS0tLQpNSUlFb2dJQkFBS0NBUUVBdVlOWVdVSndjY2x3SjFudjBLVjI0ZWdxVEFtbzNTeXExcDEvTkxmSHRndVFXMmZZClJRcmRUVnk5TzRHRXJaZTBUK2YycXBFS083YmhITG9USWcwVldCY2hVOCtoNXVYUmZVYWQvdHh1SjVodEJwSC8KWGlHQ0RtUWlIVW13SHFscnArSkMveWZPMnBvekNqWlo5UXhFUGViOEJhMGh4MnFGV1BLSnNWUmNCU3ozMzJtbQpjVmN4YTlia2xZVVBkeDBRNUZIcVZnWlc5MjRBd0c4L3lBOHFxQWI0T3FZMW1GZFFvVWlvZE40RlA0M0pFRklsCmsycTFZRWN6eVIweWJ1Ukh6UEhCOElQbUVraU1oeWlKK2x2clpLNks0eTVmVUs0NEl5MWp2L3hCQ0pyd05jZ1UKVkF0YVhNK2JXZFdLdTh0M250ZXowTTZlZTZiblZIeFN4OHQ1YXdJREFRQUJBb0lCQUdYaVRlNVB2K091Und0RgpxS0RGanlJSTJOb0Q0QnNBZ2g3MlJydVVSM21pcGppZE1yalFlN1FXUDlOamtaT3BJcDFUL3pPMERwTzNIN0VnClBJdlI5YXY0b0JRZ2o0RjVMSEdLREJIQnpEbXd6QWYwdlBSY29NbjRrb2ZWUllYQmRGK3lzeXJoR1FrVDhQNGwKMVlmd29iWUJtdDRmTk5NSm5JeTZQNGNGbHJnOEJlcmVnRFp2Z3FqWlN3Q3RoUDV4QzMzeEFEaGtJazVuVk80QQpTNEpEUGNSTDNkaU5IK3YxRkVhY2EraGc3dzNpY09XZWQ4Y0xMQnJqZmpkaXJkTUpXRW52NnYrSlgzZ2N4bjg2CkxpeXZkSk9ZNTdqSFZpTndLQ0NwQlJOVUJmbWFhK2lXNEs5QTE3K0h5VmdUTFZnLzhoeGZwV292Nkc3UEh2NTcKaXlJelBya0NnWUVBOXpjV042bW95Q0VCc0ZYRzBDTk5DdE54RHVjU290ZVoxK0JqZENBbnZycnRiQVNubUZUOAppdG5LaFR3Nkl4K3lkNzJaeXNHWkI2MGloTXZsRlhMUnRtQ0pUVGpWY0xDOXVhM2t1OHZYUzdBdmQ4YWZUcmJoCmlLeVRLMmg5NklxYUpxQzR6R0tkNStLejhKZFM0RGpjdmRUTlhSOHp6MGQxLzg1c0hXZDhsNDhDZ1lFQXdCcjAKZXZpbFN0cjdhZGxWY0tONnQ0ZWxlVXJjVTdYdElSZDhncjNpSk5jUGo0MENVUW0xTXZ5WXhTckR5MEpTQVdLbwpHWkswQVE3S1oyY2FoK2JWV3dvUnVES1hBR0NHQVE3ODRrU3lqQisrQkpqaWhDNHZkNERrcGFpSVYvdVY1NEwxCnZQVDNQcC9PdncyQU4yU0lHcWJwMjM0SmJzWlNCWVVYbWVKNmNtVUNnWUFhN1BNTWlQd0xJQjB3K1lhMzhNQloKWjRJdTMxZ1dTR2xISy9kcEZIOS90SmhiWlg1amh3NGlpV29YYk9IZ0pYbW90UXZsRzRUeFl4Z1pZcVBHM0VTZgpHcENaeXBEa3Z6dEsxL2ZMeEgza2pvSDlCN01lUGFqKzI5MERvMVBqV2dWRUk4azg2WmpOUXRIYWFJRHNUd1VyCjM5dW1RdG0vdjhiSVg5RkN1cHpGWFFLQmdBbDhTejRYTVBJMVJkekFJbnZoVnBuaFZNWmNiK3lpT3djN1JhYWYKQVorWUR1aWpxYzJla1JmbmFST3pQTis0Y3B3bTV1MzhWRzhJNysyVEpiZzRLYWpKSW43WjRLTGdJVDNFSTdCNAplK2gzV01hWlZmWDQ0ZGNnd2lsNzNOK2JTSmVaMjlCc3VCaWJnM1hqa01VcmJaMERTT0RScEYyWDVVem9lWFhiCnZQZ1JBb0dBSjVvLzNIOWJCbEp3b3Z0WjF5VUY2KzRjaFpodGhiU1VJOS9zSXFueHllNEtZMGtMaEpxU013ZkEKZ1hPSW10cmxzNllxU3VkVGovaGNwbi85VDIzbnFOSEpyd3RKWXJVMk9zdUYrdnNHUE5DeFQwZTUrSXZlQ015QQplZFhuSU9BaTBjSXhxUjluWVNXNDR0cjFEcG8rN1c5SEZ5aXZ5eVZ4M09uMzlMUi9EUHM9Ci0tLS0tRU5EIFJTQSBQUklWQVRFIEtFWS0tLS0tCg==
-  root-ca.pem: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSURVekNDQWp1Z0F3SUJBZ0lKQUxNWTFSWlB5VVZsTUEwR0NTcUdTSWIzRFFFQkN3VUFNRUF4RXpBUkJnb0oKa2lhSmsvSXNaQUVaRmdOamIyMHhGekFWQmdvSmtpYUprL0lzWkFFWkZnZGxlR0Z0Y0d4bE1SQXdEZ1lEVlFRRApEQWRHWVd0bExVTkJNQjRYRFRJeE1Ea3lNakV4TlRJMU1Gb1hEVE14TURnd01URXhOVEkxTUZvd1FERVRNQkVHCkNnbVNKb21UOGl4a0FSa1dBMk52YlRFWE1CVUdDZ21TSm9tVDhpeGtBUmtXQjJWNFlXMXdiR1V4RURBT0JnTlYKQkFNTUIwWmhhMlV0UTBFd2dnRWlNQTBHQ1NxR1NJYjNEUUVCQVFVQUE0SUJEd0F3Z2dFS0FvSUJBUURqRjQ1NApXTVVKc1NqZ3ZzSk4rNE5na3dET2thUWdOMjdXVnJyVWRIVjhoVW9sYU4vMWdSeE80cTNES2lPRnhIZlBITzVXCmg0am1YQ3VVSTA0NXRwaEVaZDlCZDd4eUU2dUF3VGtya2pVWTczMExQRmZsYzJYQXE3TkYvMElidHB1aXQ3cFIKdUV2dTc0aVNMampLWVFaWHlxUGJLazlIaitWa2xCcTV2MjJUNTlxUmwzeFV5QUNRZGVEWVdPbTg2ZFgrY2FUVAorWWt6VXhDOHFRVVdBT2JUVThBWWZXbHA3NjRpY0NuMEdab3BCalN2dXQrZWxoTnl2eHk2alhRdU0xemZYMXUrCm56bVdiQzdOMTFqK2JDZWxVd2kwQUhIZUZrRFFrcHdPaGdycW9hbG5XUHk4VVNjMDFJRTIwZnlmTEptc3ZaVU4KZ3pnK0EwOGNqOThwemF2REFnTUJBQUdqVURCT01CMEdBMVVkRGdRV0JCVGtEenFQVEV0UGFHWWhBSzkrNjB6dgpBdklmS1RBZkJnTlZIU01FR0RBV2dCVGtEenFQVEV0UGFHWWhBSzkrNjB6dkF2SWZLVEFNQmdOVkhSTUVCVEFECkFRSC9NQTBHQ1NxR1NJYjNEUUVCQ3dVQUE0SUJBUURaY1A2cmJPWFMvSFcray8yczU1Nk14VU9vTkRNenRhdlIKQXJCa01HUGk5N2FGSW1MV2h6MVJqWGw3UjZKUmE0a3VVSGdiRXBuL3F1OUFISk1LejZ6UnVSRW9EM2UzTlIwVApJL3hkbHFJOVBzTmdIaDVwSzcvb281TzUrR21vTURoK3pRTHlnbXVYcWlSenpXV3NBOVcwaXpoMFJiZHRwQzR5CmdSYmxLMVBsTVhNeWs0eFArcHljV0treExMbWhqOWhuTDdkQlR3KzQzOW13eW5MZjlhSkdHajZaNmI2ZjJTS1EKWGlPZUNFOTVQRlR4S1BCbzRvQmdjOHI2NGFxc0FNelVCa0lQZWtnQ2xQWkJJSnJtKzZZdU9HbUROVUFtUCs3RApKdmRIbGVucGJ3RXJBZ3FKYWx4NjdxVGM2eVUzWUY5bTZMTkprRHlCYXJ6VU01MVdQc1JUCi0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0K
-kind: Secret
-metadata:
-  name: zabbix-mysql-client-tls-certs
-  namespace: zabbix
-type: Opaque
-
 ---
 
 apiVersion: v1

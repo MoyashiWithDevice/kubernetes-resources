@@ -245,7 +245,7 @@ spec:
         - name: zabbix-db
           image: mysql:5.7-oracle
           args:
-           - 
+           - mysqld
            - --initialize-insecure
            - --character-set-server=utf8
            - --collation-server=utf8_bin

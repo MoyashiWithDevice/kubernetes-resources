@@ -1340,7 +1340,7 @@ type: Opaque
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: <任意の名前>
+  name: zabbix
 spec:
   capacity:
     storage: 20Gi

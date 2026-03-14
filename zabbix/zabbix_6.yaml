@@ -129,7 +129,7 @@ spec:
   selector:
     name: zabbix-agent
 ---
-apiVersion: v1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: zabbix-web

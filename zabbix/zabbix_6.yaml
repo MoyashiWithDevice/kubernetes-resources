@@ -254,17 +254,23 @@ spec:
             name: mysql
           livenessProbe:
             exec:
-              command: ["bash", "-c", "mysqladmin -u root -p$MYSQL_ROOT_PASSWORD ping"]
+              command:
+                - sh
+                - -c
+                - mysqladmin ping -h 127.0.0.1
             timeoutSeconds: 3
             failureThreshold: 3
             periodSeconds: 10
           startupProbe:
             exec:
-              command: ["bash", "-c", "mysql -u root -p$MYSQL_ROOT_PASSWORD -e 'SELECT 1'"]
-            initialDelaySeconds: 5
+              command:
+                - sh
+                - -c
+                - mysqladmin ping -h 127.0.0.1
+            failureThreshold: 60
             periodSeconds: 5
+            initialDelaySeconds: 5
             timeoutSeconds: 3
-            failureThreshold: 30
           env:
           - name: MYSQL_USER
             valueFrom:

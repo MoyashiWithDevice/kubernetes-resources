@@ -417,6 +417,13 @@ spec:
           - containerPort: 10051
             protocol: TCP
             name: zabbix-trapper
+          startupProbe:
+            tcpSocket:
+              port: 10051
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            timeoutSeconds: 10
+            failureThreshold: 60
           readinessProbe:
             tcpSocket:
               port: zabbix-trapper
@@ -426,7 +433,7 @@ spec:
             tcpSocket:
               port: zabbix-trapper
             initialDelaySeconds: 15
-            periodSeconds: 20
+            periodSeconds: 30
           env:
           - name: MYSQL_USER
             valueFrom:
@@ -476,13 +483,6 @@ spec:
           - name: zabbix-snmptraps
             mountPath: "/var/lib/zabbix/snmptraps"
             readOnly: true
-          startupProbe:
-            tcpSocket:
-              port: 10051
-            initialDelaySeconds: 60
-            periodSeconds: 10
-            timeoutSeconds: 10
-            failureThreshold: 18
           securityContext:
             capabilities: {}
             privileged: false

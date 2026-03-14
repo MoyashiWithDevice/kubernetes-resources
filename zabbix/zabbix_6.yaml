@@ -259,18 +259,6 @@ spec:
               key: db-root-pass
           - name: MYSQL_DATABASE
             value: "zabbix"
-          - name: ZBX_DB_ENCRYPTION
-            value: "true"
-          - name: ZBX_DB_CA_FILE
-            value: "/tmp/secrets/root-ca.pem"
-          - name: ZBX_DB_CERT_FILE
-            value: "/tmp/secrets/client-cert.pem"
-          - name: ZBX_DB_KEY_FILE
-            value: "/tmp/secrets/client-key.pem"
-          - name: ZBX_DB_VERIFY_HOST
-            value: "false"
-          - name: ZBX_DB_CIPHER_LIST
-            value: ""
           - name: ZBX_SSO_SETTINGS
             value: "[]"
           - name: ENABLE_WEB_ACCESS_LOG

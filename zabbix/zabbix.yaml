@@ -356,31 +356,50 @@ spec:
         - name: MYSQL_DATABASE
           value: "zabbix"
         command:
-        - sh
-        - -c
-        - |
-          echo "Checking if 'users' table exists and Admin user is missing";
+          - sh
+          - -c
+          - |
+            echo "Checking if 'users' table exists and Admin user is missing";
 
-          # テーブルの存在確認
-          TABLE_EXISTS=$(mysql -h mysql-server -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" -D "$MYSQL_DATABASE" -sse "SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA='$MYSQL_DATABASE' AND TABLE_NAME='users';")
+            # テーブルの存在確認
+            TABLE_EXISTS=$(mysql -h mysql-server -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" -D "$MYSQL_DATABASE" -sse "SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA='$MYSQL_DATABASE' AND TABLE_NAME='users';")
 
-          if [ "$TABLE_EXISTS" -eq 1 ]; then
-            echo "'users' table exists. Checking for Admin user...";
+            if [ "$TABLE_EXISTS" -eq 1 ]; then
+              echo "'users' table exists. Checking for Admin user...";
 
-            # Adminユーザの存在確認
-            ADMIN_EXISTS=$(mysql -h mysql-server -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" -D "$MYSQL_DATABASE" -sse "SELECT COUNT(*) FROM users WHERE name='Zabbix' AND surname='Admin';")
+              # Adminユーザの存在確認
+              ADMIN_EXISTS=$(mysql -h mysql-server -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" -D "$MYSQL_DATABASE" -sse "SELECT COUNT(*) FROM users WHERE username='Admin';")
 
-            if [ "$ADMIN_EXISTS" -eq 0 ]; then
-              echo "Admin user not found. Creating Admin user...";
-              mysql -h mysql-server -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" -D "$MYSQL_DATABASE" -e "
-                INSERT INTO users (userid, alias, name, surname, passwd, url, autologin, autologout, lang, theme, attempt_failed, attempt_ip)
-                VALUES (1, 'Admin', 'Zabbix', 'Admin', '\$2y\$12\$e/7Hh1ZsGz8LQgrNlyT7c.MN6zKFK/8EJUmhRCn3/LmHcUyxFZg4K', '', 1, 0, 'ja_JP', 'default', 0, '');"
+              if [ "$ADMIN_EXISTS" -eq 0 ]; then
+                echo "Admin user not found. Creating Admin user...";
+                mysql -h mysql-server -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" -D "$MYSQL_DATABASE" -e "
+                  INSERT INTO users (
+                    userid, username, name, surname, passwd, url, autologin, autologout, lang, refresh, theme, attempt_failed, attempt_ip, attempt_clock, rows_per_page, timezone, roleid
+                  ) VALUES (
+                    1,
+                    'Admin',
+                    'Zabbix',
+                    'Admin',
+                    '\$2y\$12\$e/7Hh1ZsGz8LQgrNlyT7c.MN6zKFK/8EJUmhRCn3/LmHcUyxFZg4K',
+                    '',
+                    1,
+                    '15m',
+                    'default',
+                    '30s',
+                    'default',
+                    0,
+                    '',
+                    0,
+                    50,
+                    'default',
+                    1
+                  );"
+              else
+                echo "Admin user already exists. Nothing to do.";
+              fi
             else
-              echo "Admin user already exists. Nothing to do.";
+              echo "'users' table does not exist. Skipping Admin user creation.";
             fi
-          else
-            echo "'users' table does not exist. Skipping Admin user creation.";
-          fi
       containers:
         - name: zabbix-server
           image: zabbix/zabbix-server-mysql:alpine-6.0-latest

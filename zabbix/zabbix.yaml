@@ -693,7 +693,7 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: zabbix-mysql-data-claim
+  name: zabbix-mysql-claim
   namespace: zabbix
 spec:
   storageClassName: rook-ceph-block

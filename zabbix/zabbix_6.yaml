@@ -373,6 +373,8 @@ spec:
             value: "zabbix"
           - name: ZBX_HISTORYSTORAGEDATEINDEX
             value: "1"
+          - name: ZBX_ALLOWUNSUPPORTEDDBVERSIONS
+            value: "1"
           - name: ZBX_STARTREPORTWRITERS
             value: "3"
           - name: ZBX_WEBSERVICEURL

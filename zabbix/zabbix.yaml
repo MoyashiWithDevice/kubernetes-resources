@@ -243,7 +243,7 @@ spec:
           claimName: zabbix-mysql-data-claim
       containers:
         - name: zabbix-db
-          image: mysql:8.0-oracle
+          image: mysql:5.7-oracle
           args:
            - mysqld
            - --character-set-server=utf8

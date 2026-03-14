@@ -336,7 +336,7 @@ spec:
           done;
           echo "mysql ready";
       - name: init-admin-user
-        image: mysql:8.0-oracle
+        image: mysql:5.7-oracle
         env:
         - name: MYSQL_USER
           valueFrom:

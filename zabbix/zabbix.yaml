@@ -240,7 +240,7 @@ spec:
       volumes:
        - name: zabbix-mysql-data
          persistentVolumeClaim:
-          claimName: zabbix-mysql-data-claim
+          claimName: zabbix-mysql-claim
       containers:
         - name: zabbix-db
           image: mysql:5.7-oracle

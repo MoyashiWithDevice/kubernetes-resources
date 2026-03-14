@@ -609,8 +609,8 @@ metadata:
   namespace: zabbix
 spec:
   scaleTargetRef:
-    apiVersion: v1
-    kind: ReplicationController
+    apiVersion: apps/v1
+    kind: Deployment
     name: zabbix-web
   minReplicas: 1
   maxReplicas: 5

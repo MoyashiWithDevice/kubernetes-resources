@@ -417,13 +417,13 @@ spec:
           - containerPort: 10051
             protocol: TCP
             name: zabbix-trapper
-          startupProbe:
-            tcpSocket:
-              port: 10051
-            initialDelaySeconds: 60
-            periodSeconds: 10
-            timeoutSeconds: 10
-            failureThreshold: 60
+          # startupProbe:
+          #   tcpSocket:
+          #     port: 10051
+          #   initialDelaySeconds: 60
+          #   periodSeconds: 10
+          #   timeoutSeconds: 10
+          #   failureThreshold: 60
           readinessProbe:
             tcpSocket:
               port: zabbix-trapper

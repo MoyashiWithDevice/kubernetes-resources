@@ -253,13 +253,13 @@ spec:
             name: mysql
           livenessProbe:
             exec:
-              command: ["bash", "-c", "mysqladmin -u root -p$MYSQL_ROOT_PASSWORD ping"]
+              command: ["bash", "-c", "mariadb-admin -u root -p$MYSQL_ROOT_PASSWORD ping"]
             timeoutSeconds: 3
             failureThreshold: 3
             periodSeconds: 10
           startupProbe:
             exec:
-              command: ["bash", "-c", "mysql -u root -p$MYSQL_ROOT_PASSWORD -e 'SELECT 1'"]
+              command: ["bash", "-c", "mariadb -u root -p$MYSQL_ROOT_PASSWORD -e 'SELECT 1'"]
             initialDelaySeconds: 5
             periodSeconds: 5
             timeoutSeconds: 3

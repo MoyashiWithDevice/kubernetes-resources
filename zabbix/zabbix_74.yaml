@@ -536,7 +536,7 @@ spec:
             - name: ZBX_LOGREMOTECOMMANDS
               value: "1"
             - name: ZBX_SERVER_HOST
-              value: "zabbix-server,172.32.0.5,172.32.0.6,172.31.0.9"
+              value: "zabbix-server,kube-worker-rhel.local.newvia.net,172.32.0.6,kube-ctrl.local.newvia.net,zabbix-server.zabbix.svc.cluster.local"
             - name: ZBX_ACTIVESERVERS
               value: ""
             - name: ZBX_PASSIVE_ALLOW

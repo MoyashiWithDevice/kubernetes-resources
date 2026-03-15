@@ -31,6 +31,7 @@ spec:
         - containerPort: 40004
         - containerPort: 40005
         - containerPort: 40006
+        - containerPort: 40007
         volumeMounts:
           - name: nginx-conf
             mountPath: /etc/nginx/conf.d
@@ -83,6 +84,11 @@ spec:
       protocol: TCP
       port: 40006
       targetPort: 40006
+    
+    - name: zabbix-console 
+      protocol: TCP
+      port: 40007
+      targetPort: 40007
 
 ---
 
@@ -145,6 +151,22 @@ data:
       location / {
         set $upstream "keycloak.keycloak.svc.cluster.local";
         proxy_pass http://$upstream:8080;
+        include /etc/nginx/conf.d/param.conf;
+      }
+    }
+
+    server{
+      listen 0.0.0.0:40007;
+      listen [::]:40007;
+      server_name zabbix.newvia.net;
+      proxy_set_header Host zabbix.newvia.net;
+      proxy_set_header X-Forwarded-Proto https;
+
+      resolver 10.96.0.10 valid=10s ipv6=off;
+
+      location / {
+        set $upstream "zabbix-web.zabbix.svc.cluster.local";
+        proxy_pass http://$upstream:80;
         include /etc/nginx/conf.d/param.conf;
       }
     }

@@ -658,3 +658,4 @@ data:
     ServerActive=zabbix-server
     HostnameItem=system.hostname
     ListenPort=10050
+    LogType=console

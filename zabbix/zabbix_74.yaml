@@ -241,12 +241,10 @@ spec:
        - name: zabbix-mysql-data
          persistentVolumeClaim:
           claimName: zabbix-mysql-data-claim
-       - name: mysql-tls-certs
-         secret:
-          secretName: zabbix-mysql-server-tls-certs
       containers:
         - name: zabbix-db
-          image: mysql:9-oracle
+          # image: mysql:9-oracle
+          image: mariadb:lts
           args:
            - mysqld
            - --character-set-server=utf8mb4
@@ -363,14 +361,6 @@ spec:
             value: "http://zabbix-web-service:10053/report"
           - name: ZBX_DEBUGLEVEL
             value: "4"
-          - name: ZBX_JAVAGATEWAY_ENABLE
-            value: "false"
-          - name: ZBX_JAVAGATEWAY
-            value: "zabbix-java-gateway"
-          - name: ZBX_JAVAGATEWAYPORT
-            value: "10052"
-          - name: ZBX_STARTJAVAPOLLERS
-            value: "5"
           - name: ZBX_ENABLE_SNMP_TRAPS
             value: "true"
           - name: ZBX_TIMEOUT

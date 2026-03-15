@@ -185,7 +185,7 @@ spec:
           - name: ZBX_SERVER_NAME
             value: "Zabbix Kubernetes"
           - name: PHP_TZ
-            value: "Europe/Riga"
+            value: "Asia/Tokyo"
           - name: DB_SERVER_HOST
             value: "mysql-server"
           - name: MYSQL_USER
@@ -213,6 +213,10 @@ spec:
             value: "true"
           - name: DEBUG_MODE
             value: "false"
+          - name: ZBX_SERVER_HOST
+            value: "zabbix-server"
+          - name: ZBX_SERVER_PORT
+            value: "10051"
 ---
 apiVersion: apps/v1
 kind: Deployment

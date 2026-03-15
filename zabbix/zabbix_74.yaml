@@ -569,6 +569,9 @@ spec:
               mountPath: /node/run
             - name: var-run-volume
               mountPath: /node/var/run
+            - name: zabbix-agent-config
+              mountPath: /etc/zabbix/zabbix_agentd.conf
+              subPath: zabbix_agentd.conf
       volumes:
         - name: dev-volume
           hostPath:
@@ -590,6 +593,9 @@ spec:
           hostPath:
             path: /var/run
             type: ''
+        - name: zabbix-agent-config
+          configMap:
+            name: zabbix-agent-config
 ---
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
@@ -639,3 +645,16 @@ items:
      db-root-pass: "c29tZV90ZXN0X3Bhc3M="
      db-zbx-user: "emFiYml4"
      db-zbx-pass: "emJ4X3Bhc3N3b3Jk"
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: zabbix-agent-config
+  namespace: zabbix
+data:
+  zabbix_agentd.conf: |
+    Server=0.0.0.0/0
+    ServerActive=zabbix-server
+    HostnameItem=system.hostname
+    ListenPort=10050

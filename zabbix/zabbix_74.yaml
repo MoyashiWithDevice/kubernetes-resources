@@ -246,7 +246,6 @@ spec:
           # image: mysql:9-oracle
           image: mariadb:lts
           args:
-           - mysqld
            - --character-set-server=utf8mb4
            - --collation-server=utf8mb4_bin
           ports:

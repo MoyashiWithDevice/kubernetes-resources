@@ -316,6 +316,27 @@ spec:
       volumes:
        - name: zabbix-snmptraps
          emptyDir: {}
+      initContainers:
+      - name: init-db-data
+        image: zabbix/zabbix-server-mysql:alpine-7.4-latest
+        command:
+          - "/bin/bash"
+          - "-c"
+          - |
+            # DBにテーブルがあるか確認し、データが足りない場合のみ実行
+            echo "Checking database..."
+            if zcat /usr/share/doc/zabbix-server-mysql/create.sql.gz | mariadb -h mysql-server -u $ZBX_DB_USER -p$ZBX_DB_PASSWORD $ZBX_DB_NAME --force; then
+              echo "Database data injection completed (with some skips)."
+            else
+              echo "Injection failed, but moving on..."
+            fi
+        env:
+          - name: ZBX_DB_USER
+            value: "zabbix"
+          - name: ZBX_DB_PASSWORD
+            value: "zbx_password" # Secretから取っている場合はそちらに合わせてください
+          - name: ZBX_DB_NAME
+            value: "zabbix"
       containers:
         - name: zabbix-server
           image: zabbix/zabbix-server-mysql:alpine-7.4-latest

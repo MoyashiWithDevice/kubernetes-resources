@@ -534,7 +534,7 @@ spec:
               value: "system.run[*]"
             - name: ZBX_LOGREMOTECOMMANDS
               value: "1"
-            - name: ZBX_SERVER
+            - name: ZBX_SERVER_HOST
               value: "172.31.0.0/24,172.32.0.0/24"
             - name: ZBX_ACTIVESERVERS
               value: "zabbix-server"

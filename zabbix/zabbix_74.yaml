@@ -250,7 +250,7 @@ spec:
           args:
            - mysqld
            - --character-set-server=utf8mb4
-           - --collation-server=utf8_bin
+           - --collation-server=utf8mb4_bin
           ports:
           - containerPort: 3306
             name: mysql

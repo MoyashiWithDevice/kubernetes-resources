@@ -462,7 +462,7 @@ spec:
           - name: ZBX_WEBSERVICEURL
             value: "http://zabbix-web-service:10053/report"
           - name: ZBX_DEBUGLEVEL
-            value: "3"
+            value: "4"
           - name: ZBX_JAVAGATEWAY_ENABLE
             value: "true"
           - name: ZBX_JAVAGATEWAY
@@ -478,7 +478,7 @@ spec:
           - name: ZBX_LOGSLOWQUERIES
             value: "3000"
           - name: DEBUG_MODE
-            value: "false"
+            value: "true"
           volumeMounts:
           - name: zabbix-snmptraps
             mountPath: "/var/lib/zabbix/snmptraps"
